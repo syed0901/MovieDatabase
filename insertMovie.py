@@ -87,6 +87,7 @@ def handleFiles(path,mode):
             except IOError:
                 pass
 
+
     os.system(INSERT_BATCH)
 
 def main():
@@ -113,7 +114,7 @@ def var_initialization():
     INSERT_SQL = 'C:\\Users\\srizvi.NTNET\\PycharmProjects\\\MovieDatabase\\movie_insert.sql'
     INSERT_BATCH = 'C:\\Users\\srizvi.NTNET\\PycharmProjects\\\MovieDatabase\\movie_insert.bat'
     DELETE_BACTH = 'C:\\Users\\srizvi.NTNET\\PycharmProjects\\\MovieDatabase\\movie_delete.bat'
-    INSERT_QUE_PREFIX = "INSERT INTO MOVIE (name,language,imdb_rating,location) VALUES('"
+    INSERT_QUE_PREFIX = "INSERT IGNORE INTO MOVIE (name,language,imdb_rating,location) VALUES('"
     LANG_HIN = "Hindi"
     LANG_ENG = "English"
     SINGLE_QUOTE = "'"
