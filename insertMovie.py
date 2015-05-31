@@ -2,7 +2,6 @@ __author__ = 'SRIZVI'
 #31-05-2015
 #This program takes Movies directory or the movie file as input.
 #It makes entries in the MySQL DB for the movie files or movie files in the directories
-#It also fetches the IMDB rating from "omdbapi.com" of each movie and insert in DB.
 #If whole source is passed as input Dir, Program will refresh the complete table i.e. delete and insert again.
 
 import os
@@ -26,6 +25,8 @@ def returnFullFileNames(path):
 
 #This func will fetch the language of movie as they are saved and will make inserts for DB
 def get_imdb_rating(basename,year):
+    imdb_rating = "0"
+    lang = ""
     try:
         if str(year) != '0':
             url = "http://www.omdbapi.com/?t=" + basename+"&y="+str(year)
@@ -35,11 +36,15 @@ def get_imdb_rating(basename,year):
         response = urllib.urlopen(url).read()
         jsonvalues = json.loads(response)
         if jsonvalues["Response"] == "True":
-            return jsonvalues['imdbRating']
+            imdb_rating =  jsonvalues['imdbRating']
+            lang = jsonvalues['Language']
+            return imdb_rating,lang
         else:
-            return "0"
+            return imdb_rating,lang
     except IOError:
-        return "0"
+        return imdb_rating,lang
+
+
 
 
 def handleFiles(path,mode):
@@ -64,12 +69,15 @@ def handleFiles(path,mode):
             basename = nameCorrection(basename,wordDic)
             basename=basename.replace("."," ")
             basename=basename.rstrip()
+            basename=basename.lstrip()
             p = re.search(r'[12]\d{3}',basename)
             if p is not None:
                 basename=basename[0:p.end()+1]
-                imdb_rating=get_imdb_rating(basename[0:p.start()], basename[p.start():p.end()])
+                imdb_rating,imdb_lang=get_imdb_rating(basename[0:p.start()], basename[p.start():p.end()])
             else:
-                imdb_rating=get_imdb_rating(basename,0)
+                imdb_rating,imdb_lang=get_imdb_rating(basename,0)
+            if not imdb_lang == "":
+                lang = imdb_lang
             file_name=file_name.replace("\\","\\\\")
             try:
                 f.write(INSERT_QUE_PREFIX +basename+ SINGLE_QUOTE + ",'"+lang+"',"+ SINGLE_QUOTE + imdb_rating +SINGLE_QUOTE+ "," + SINGLE_QUOTE +os.path.splitdrive(os.path.dirname(file_name))[1]+"');" + "\n")
@@ -102,9 +110,9 @@ def main():
 def var_initialization():
     global COMPLETE_SOURCE, INSERT_SQL, INSERT_BATCH, DELETE_BACTH, INSERT_QUE_PREFIX, LANG_HIN, LANG_ENG, SINGLE_QUOTE, FILE_TYPES
     COMPLETE_SOURCE = "\\DATA\\Movies"
-    INSERT_SQL = 'C:\\Users\\srizvi\\Projects\\\MovieDatabase\\movie_insert.sql'
-    INSERT_BATCH = 'C:\\Users\\srizvi\\Projects\\\MovieDatabase\\movie_insert.bat'
-    DELETE_BACTH = 'C:\\Users\\srizvi\\Projects\\\MovieDatabase\\movie_delete.bat'
+    INSERT_SQL = 'C:\\Users\\srizvi.NTNET\\PycharmProjects\\\MovieDatabase\\movie_insert.sql'
+    INSERT_BATCH = 'C:\\Users\\srizvi.NTNET\\PycharmProjects\\\MovieDatabase\\movie_insert.bat'
+    DELETE_BACTH = 'C:\\Users\\srizvi.NTNET\\PycharmProjects\\\MovieDatabase\\movie_delete.bat'
     INSERT_QUE_PREFIX = "INSERT INTO MOVIE (name,language,imdb_rating,location) VALUES('"
     LANG_HIN = "Hindi"
     LANG_ENG = "English"
